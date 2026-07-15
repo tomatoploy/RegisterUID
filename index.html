@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงทะเบียนรับใบแจ้งหนี้ออนไลน์ - เพชรพลอยเพลส</title>
+    <!-- นำเข้า Google Fonts คล้ายสไตล์มินิมอลโมเดิร์น -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Sarabun', sans-serif;
+        }
+
+        body {
+            background-color: #f3f4f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+            width: 100%;
+            max-width: 450px;
+            padding: 32px 24px;
+            text-align: center;
+        }
+
+        .logo-area {
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            width: 64px;
+            height: 64px;
+            background-color: #06c755;
+            color: white;
+            border-radius: 50%;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2);
+        }
+
+        h2 {
+            color: #1f2937;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        p.subtitle {
+            color: #4b5563;
+            font-size: 14px;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #1f2937;
+            transition: all 0.2s ease;
+            outline: none;
+            background-color: #f9fafb;
+        }
+
+        input:focus {
+            border-color: #06c755;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.1);
+        }
+
+        .uid-box {
+            background-color: #f3f4f6;
+            border: 1px dashed #cbd5e1;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #64748b;
+            word-break: break-all;
+            font-family: monospace;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: #f75c1c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            margin-top: 12px;
+            box-shadow: 0 4px 12px rgba(6, 199, 85, 0.15);
+        }
+
+        .btn-submit:hover {
+            background-color: #dc4a0c;
+        }
+
+        .footer-text {
+            margin-top: 24px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+        
+        /* สไตล์หน้าจอทำรายการสำเร็จ */
+        .success-view {
+            display: none;
+        }
+        
+        .success-icon {
+            font-size: 48px;
+            color: #06c755;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container" id="mainCard">
+        <!-- หน้าฟอร์มลงทะเบียน -->
+        <div id="formView">
+            <div class="logo-area">
+                <img src="Logo.png" alt="เพชร พลอย เพลส" style="width: 40px;">
+                <h2>เพชร พลอย เพลส</h2>
+                <p class="subtitle">ลงทะเบียนเพื่อเชื่อมต่อบัญชี LINE สำหรับรับใบเสร็จและใบแจ้งหนี้ประจำเดือน</p>
+            </div>
+
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="roomNumber">หมายเลขห้องพัก</label>
+                    <input type="text" id="roomNumber" placeholder="ตัวอย่าง: 101" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="telephone">เบอร์โทรศัพท์</label>
+                    <input type="tel" id="telephone" placeholder="ตัวอย่าง: 0845251330" required>
+                </div>
+
+                <!-- <div class="form-group">
+                    <label>LINE User ID ของคุณ</label>
+                    <div class="uid-box" id="uidDisplay">กำลังดึงข้อมูล LINE UID...</div>
+                </div> -->
+
+                <button type="submit" class="btn-submit">ยืนยันการลงทะเบียน</button>
+            </form>
+            <p class="footer-text">© 2026 Petch Ploy Place. All rights reserved.</p>
+        </div>
+
+        <!-- หน้าจอลงทะเบียนสำเร็จ -->
+        <div id="successView" class="success-view">
+            <div class="success-icon">✓</div>
+            <h2>ลงทะเบียนสำเร็จ</h2>
+            <p class="subtitle" style="margin-bottom: 20px;">ระบบได้ผูกบัญชี LINE ของคุณกับห้องพักเรียบร้อยแล้ว ขอบคุณครับ</p>
+            <button class="btn-submit" onclick="window.close();" style="background-color: #4b5563;">X</button>
+        </div>
+    </div>
+
+    <!-- โค้ดตัวอย่างเชื่อม LIFF และส่งข้อมูล -->
+    <script>
+        // ใส่รหัส LIFF ID ของคุณตรงนี้หลังจากสมัครใน LINE Developers
+        const MY_LIFF_ID = 'YOUR_LIFF_ID_HERE'; 
+        let userUid = "U" + Math.random().toString(16).slice(2, 10) + "mockuidtestonly"; // ค่าจำลองสำหรับดูผลลัพธ์ตัวอย่าง
+
+        document.getElementById('uidDisplay').innerText = userUid;
+
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const room = document.getElementById('roomNumber').value;
+            const tel = document.getElementById('telephone').value;
+            
+            // เมื่อใช้งานจริง ตรงนี้จะยิงคำสั่ง Fetch ส่งข้อมูลไปหา Google Apps Script Web App URL
+            // ตัวอย่าง:
+            // fetch('YOUR_GAS_WEB_APP_URL', {
+            //     method: 'POST',
+            //     body: JSON.stringify({ room: room, tel: tel, uid: userUid })
+            // })
+            
+            // แสดงหน้าจอสำเร็จ
+            document.getElementById('formView').style.display = 'none';
+            document.getElementById('successView').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
