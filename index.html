@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ลงทะเบียนรับใบแจ้งหนี้ออนไลน์</title>
-    <!-- นำเข้า Google Fonts คล้ายสไตล์มินิมอลโมเดิร์น -->
+    <title>เพชร พลอย เพลส</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     
-    <!-- นำเข้า LINE LIFF SDK (จำเป็นมากสำหรับการดึง UID จริง) -->
+    <!-- นำเข้า LINE LIFF SDK (ดึง UID) -->
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 
     <style>
@@ -154,7 +153,7 @@
             <div class="logo-area">
                 <img src="Logo.png" alt="เพชร พลอย เพลส">
                 <h2>เพชร พลอย เพลส</h2>
-                <p class="subtitle">ลงทะเบียนเพื่อเชื่อมต่อบัญชี LINE สำหรับรับใบเสร็จและใบแจ้งหนี้ประจำเดือน</p>
+                <p class="subtitle">ระบบลงทะเบียนเพื่อเชื่อมต่อบัญชี LINE สำหรับรับใบเสร็จรับเงินอิเล็กทรอนิกส์</p>
             </div>
 
             <!-- ข้อความแจ้งสถานะโหลดข้อมูลจาก LINE -->
@@ -181,7 +180,7 @@
             <div class="success-icon">✓</div>
             <h2>ลงทะเบียนสำเร็จ</h2>
             <p class="subtitle" style="margin-bottom: 20px;">ระบบได้ผูกบัญชี LINE ของคุณกับห้องพักเรียบร้อยแล้ว ขอบคุณครับ</p>
-            <button class="btn-submit" onclick="liff.closeWindow();" style="background-color: #4b5563; box-shadow: none;">ปิดหน้าต่างนี้</button>
+            <button class="btn-submit" onclick="handleClose();" style="background-color: #f75c1c; box-shadow: none;">ปิดหน้าต่างนี้</button>
         </div>
     </div>
 
@@ -242,6 +241,14 @@
                 document.getElementById('submitBtn').disabled = false;
             });
         });
+
+        function handleClose() {
+            if (liff.isInClient()) {
+                liff.closeWindow(); // ถ้าเปิดในแอป LINE ให้ปิดหน้าต่างทันที
+            } else {
+                alert("ลงทะเบียนเสร็จเรียบร้อยแล้ว คุณสามารถปิดแท็บเบราว์เซอร์นี้ได้เลยค่ะ");
+            }
+        }
     </script>
 </body>
 </html>
