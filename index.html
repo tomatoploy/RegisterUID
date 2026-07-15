@@ -225,6 +225,10 @@
             // ส่งข้อมูลไปยัง Google Apps Script
             fetch('https://script.google.com/macros/s/AKfycbx65cUVfNubVAMVNb4yE745YEfrxQoZ64-QcUWiazpiN2Xis_dJdCp1QI1DzwRa9PwL2g/exec', {
                 method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({ room: room, tel: tel, uid: userUid })
             })
             .then(res => {
