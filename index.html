@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ลงทะเบียนรับใบแจ้งหนี้ออนไลน์ - เพชรพลอยเพลส</title>
+    <title>ลงทะเบียนรับใบแจ้งหนี้ออนไลน์</title>
     <!-- นำเข้า Google Fonts คล้ายสไตล์มินิมอลโมเดิร์น -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- นำเข้า LINE LIFF SDK (จำเป็นมากสำหรับการดึง UID จริง) -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+
     <style>
         * {
             box-sizing: border-box;
@@ -39,19 +43,12 @@
             margin-bottom: 24px;
         }
 
-        .logo-icon {
-            width: 64px;
-            height: 64px;
-            background-color: #06c755;
-            color: white;
-            border-radius: 50%;
-            display: inline-flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 32px;
-            font-weight: bold;
+        .logo-area img {
+            width: 70px;
+            height: auto;
             margin-bottom: 12px;
-            box-shadow: 0 4px 12px rgba(6, 199, 85, 0.2);
+            border-radius: 50%;
+            object-fit: cover;
         }
 
         h2 {
@@ -94,20 +91,9 @@
         }
 
         input:focus {
-            border-color: #06c755;
+            border-color: #f75c1c;
             background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(6, 199, 85, 0.1);
-        }
-
-        .uid-box {
-            background-color: #f3f4f6;
-            border: 1px dashed #cbd5e1;
-            padding: 10px 14px;
-            border-radius: 8px;
-            font-size: 12px;
-            color: #64748b;
-            word-break: break-all;
-            font-family: monospace;
+            box-shadow: 0 0 0 3px rgba(247, 92, 28, 0.1);
         }
 
         .btn-submit {
@@ -122,11 +108,17 @@
             cursor: pointer;
             transition: background-color 0.2s ease;
             margin-top: 12px;
-            box-shadow: 0 4px 12px rgba(6, 199, 85, 0.15);
+            box-shadow: 0 4px 12px rgba(247, 92, 28, 0.2);
         }
 
         .btn-submit:hover {
             background-color: #dc4a0c;
+        }
+        
+        .btn-submit:disabled {
+            background-color: #cbd5e1;
+            box-shadow: none;
+            cursor: not-allowed;
         }
 
         .footer-text {
@@ -141,9 +133,16 @@
         }
         
         .success-icon {
-            font-size: 48px;
+            font-size: 56px;
             color: #06c755;
             margin-bottom: 16px;
+        }
+        
+        #loadingText {
+            font-size: 12px;
+            color: #f75c1c;
+            margin-bottom: 10px;
+            font-weight: 500;
         }
     </style>
 </head>
@@ -153,10 +152,13 @@
         <!-- หน้าฟอร์มลงทะเบียน -->
         <div id="formView">
             <div class="logo-area">
-                <img src="Logo.png" alt="เพชร พลอย เพลส" style="width: 40px;">
+                <img src="Logo.png" alt="เพชร พลอย เพลส">
                 <h2>เพชร พลอย เพลส</h2>
                 <p class="subtitle">ลงทะเบียนเพื่อเชื่อมต่อบัญชี LINE สำหรับรับใบเสร็จและใบแจ้งหนี้ประจำเดือน</p>
             </div>
+
+            <!-- ข้อความแจ้งสถานะโหลดข้อมูลจาก LINE -->
+            <div id="loadingText">กำลังเชื่อมต่อระบบ LINE...</div>
 
             <form id="registerForm">
                 <div class="form-group">
@@ -169,12 +171,7 @@
                     <input type="tel" id="telephone" placeholder="ตัวอย่าง: 0845251330" required>
                 </div>
 
-                <!-- <div class="form-group">
-                    <label>LINE User ID ของคุณ</label>
-                    <div class="uid-box" id="uidDisplay">กำลังดึงข้อมูล LINE UID...</div>
-                </div> -->
-
-                <button type="submit" class="btn-submit">ยืนยันการลงทะเบียน</button>
+                <button type="submit" id="submitBtn" class="btn-submit" disabled>ยืนยันการลงทะเบียน</button>
             </form>
             <p class="footer-text">© 2026 Petch Ploy Place. All rights reserved.</p>
         </div>
@@ -184,34 +181,62 @@
             <div class="success-icon">✓</div>
             <h2>ลงทะเบียนสำเร็จ</h2>
             <p class="subtitle" style="margin-bottom: 20px;">ระบบได้ผูกบัญชี LINE ของคุณกับห้องพักเรียบร้อยแล้ว ขอบคุณครับ</p>
-            <button class="btn-submit" onclick="window.close();" style="background-color: #4b5563;">X</button>
+            <button class="btn-submit" onclick="liff.closeWindow();" style="background-color: #4b5563; box-shadow: none;">ปิดหน้าต่างนี้</button>
         </div>
     </div>
 
-    <!-- โค้ดตัวอย่างเชื่อม LIFF และส่งข้อมูล -->
     <script>
-        // ใส่รหัส LIFF ID ของคุณตรงนี้หลังจากสมัครใน LINE Developers
-        const MY_LIFF_ID = 'YOUR_LIFF_ID_HERE'; 
-        let userUid = "U" + Math.random().toString(16).slice(2, 10) + "mockuidtestonly"; // ค่าจำลองสำหรับดูผลลัพธ์ตัวอย่าง
+        const MY_LIFF_ID = '2010715614-37aEPk2I'; 
+        let userUid = ""; 
 
-        document.getElementById('uidDisplay').innerText = userUid;
+        // เริ่มต้นการทำงานของ LINE LIFF อัตโนมัติเมื่อเปิดหน้าเว็บ
+        liff.init({ liffId: MY_LIFF_ID })
+            .then(() => {
+                if (!liff.isLoggedIn()) {
+                    liff.login(); // บังคับล็อกอินหากไม่ได้เปิดในแอป LINE
+                } else {
+                    liff.getProfile()
+                        .then(profile => {
+                            userUid = profile.userId; // 📌 ดึง LINE UID ของจริงสำเร็จ!
+                            document.getElementById('loadingText').style.display = 'none';
+                            document.getElementById('submitBtn').disabled = false; // เปิดให้กดปุ่มได้
+                        })
+                        .catch(err => {
+                            document.getElementById('loadingText').innerText = "ดึงข้อมูลโปรไฟล์ล้มเหลว";
+                            console.error(err);
+                        });
+                }
+            })
+            .catch(err => {
+                document.getElementById('loadingText').innerText = "เชื่อมต่อ LINE ล้มเหลว";
+                console.error(err);
+            });
 
+        // ฟังก์ชันเมื่อกดส่งฟอร์ม
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
             const room = document.getElementById('roomNumber').value;
             const tel = document.getElementById('telephone').value;
             
-            // เมื่อใช้งานจริง ตรงนี้จะยิงคำสั่ง Fetch ส่งข้อมูลไปหา Google Apps Script Web App URL
-            // ตัวอย่าง:
-            // fetch('YOUR_GAS_WEB_APP_URL', {
-            //     method: 'POST',
-            //     body: JSON.stringify({ room: room, tel: tel, uid: userUid })
-            // })
-            
-            // แสดงหน้าจอสำเร็จ
-            document.getElementById('formView').style.display = 'none';
-            document.getElementById('successView').style.display = 'block';
+            document.getElementById('submitBtn').innerText = "กำลังบันทึกข้อมูล...";
+            document.getElementById('submitBtn').disabled = true;
+
+            // ส่งข้อมูลไปยัง Google Apps Script
+            fetch('https://script.google.com/macros/s/AKfycbx65cUVfNubVAMVNb4yE745YEfrxQoZ64-QcUWiazpiN2Xis_dJdCp1QI1DzwRa9PwL2g/exec', {
+                method: 'POST',
+                body: JSON.stringify({ room: room, tel: tel, uid: userUid })
+            })
+            .then(res => {
+                // แสดงหน้าจอสำเร็จ
+                document.getElementById('formView').style.display = 'none';
+                document.getElementById('successView').style.display = 'block';
+            })
+            .catch(err => {
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล กรุณาลองใหม่อีกครั้ง");
+                document.getElementById('submitBtn').innerText = "ยืนยันการลงทะเบียน";
+                document.getElementById('submitBtn').disabled = false;
+            });
         });
     </script>
 </body>
