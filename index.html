@@ -188,28 +188,33 @@
         const MY_LIFF_ID = '2010715614-37aEPk2I'; 
         let userUid = ""; 
 
-        // เริ่มต้นการทำงานของ LINE LIFF อัตโนมัติเมื่อเปิดหน้าเว็บ
-        liff.init({ liffId: MY_LIFF_ID })
-            .then(() => {
-                if (!liff.isLoggedIn()) {
-                    liff.login(); // บังคับล็อกอินหากไม่ได้เปิดในแอป LINE
-                } else {
-                    liff.getProfile()
-                        .then(profile => {
-                            userUid = profile.userId; // 📌 ดึง LINE UID ของจริงสำเร็จ!
-                            document.getElementById('loadingText').style.display = 'none';
-                            document.getElementById('submitBtn').disabled = false; // เปิดให้กดปุ่มได้
-                        })
-                        .catch(err => {
-                            document.getElementById('loadingText').innerText = "ดึงข้อมูลโปรไฟล์ล้มเหลว";
-                            console.error(err);
-                        });
-                }
-            })
-            .catch(err => {
-                document.getElementById('loadingText').innerText = "เชื่อมต่อ LINE ล้มเหลว";
-                console.error(err);
-            });
+        // เริ่มต้นการทำงานของ LINE LIFF
+        liff.init({ 
+            liffId: MY_LIFF_ID,
+            withLoginOnExternalBrowser: true
+        })
+        .then(() => {
+            if (!liff.isLoggedIn()) {
+                liff.login(); // บังคับล็อกอินหากยังไม่ได้เข้าสู่ระบบ
+            } else {
+                liff.getProfile()
+                    .then(profile => {
+                        userUid = profile.userId; // ดึง LINE UID สำเร็จ
+                        document.getElementById('loadingText').style.display = 'none';
+                        document.getElementById('submitBtn').disabled = false; // เปิดให้กดปุ่มได้
+                    })
+                    .catch(err => {
+                        // 📌 ดักแสดง Error ให้เห็นชัดๆ บนหน้าจอ
+                        document.getElementById('loadingText').innerText = "ดึงข้อมูลโปรไฟล์ล้มเหลว: " + err.message;
+                        console.error("Profile Error:", err);
+                    });
+            }
+        })
+        .catch(err => {
+            // 📌 ถ้าเชื่อมต่อล้มเหลว จะบอกรหัส Error ออกมาบนหน้าจอเลย
+            document.getElementById('loadingText').innerText = "เชื่อมต่อ LINE ล้มเหลว: " + (err.message || err.code);
+            console.error("Init Error:", err);
+        });
 
         // ฟังก์ชันเมื่อกดส่งฟอร์ม
         document.getElementById('registerForm').addEventListener('submit', function(e) {
@@ -231,7 +236,6 @@
                 body: JSON.stringify({ room: room, tel: tel, uid: userUid })
             })
             .then(res => {
-                // แสดงหน้าจอสำเร็จ
                 document.getElementById('formView').style.display = 'none';
                 document.getElementById('successView').style.display = 'block';
             })
@@ -244,7 +248,7 @@
 
         function handleClose() {
             if (liff.isInClient()) {
-                liff.closeWindow(); // ถ้าเปิดในแอป LINE ให้ปิดหน้าต่างทันที
+                liff.closeWindow();
             } else {
                 alert("ลงทะเบียนเสร็จเรียบร้อยแล้ว คุณสามารถปิดแท็บเบราว์เซอร์นี้ได้เลยค่ะ");
             }
