@@ -184,46 +184,36 @@
         </div>
     </div>
 
-<script>
+    <script>
         const MY_LIFF_ID = '2010715614-37aEPk2I'; 
         let userUid = ""; 
 
-        // เริ่มต้นการทำงานของ LINE LIFF
+        // 📌 ปรับวิธีเรียก LIFF ให้เรียบง่าย ไม่วนลูป ป้องกันหน้าจอกำลังเชื่อมต่อค้างใน Android
         liff.init({ liffId: MY_LIFF_ID })
             .then(() => {
-                // 📌 ตรวจสอบก่อนว่าเปิดในแอป LINE (InClient) หรือเปิดบนเว็บทั่วไป
-                if (liff.isInClient()) {
-                    // ถ้าเปิดในแอป LINE ให้ดึงข้อมูลโปรไฟล์ได้เลยทันที (ห้ามเรียก liff.login() ซ้ำ)
-                    fetchUserProfile();
+                if (!liff.isLoggedIn()) {
+                    // ถ้ายังไม่ได้ล็อกอิน ให้สั่งล็อกอินพร้อมระบุหน้าเว็บกลับมาชัดเจน
+                    liff.login({ redirectUri: window.location.href });
                 } else {
-                    // ถ้าเปิดเบราว์เซอร์นอก LINE แล้วยังไม่ได้ล็อกอิน ถึงจะค่อยพาไปหน้าล็อกอิน
-                    if (!liff.isLoggedIn()) {
-                        liff.login({ redirectUri: window.location.href });
-                    } else {
-                        fetchUserProfile();
-                    }
+                    // ดึงข้อมูลโปรไฟล์ทันทีเมื่อล็อกอินแล้ว
+                    return liff.getProfile();
+                }
+            })
+            .then(profile => {
+                if (profile) {
+                    userUid = profile.userId; // ดึง LINE UID สำเร็จ
+                    document.getElementById('loadingText').style.display = 'none'; // ซ่อนคำว่ากำลังเชื่อมต่อ
+                    document.getElementById('submitBtn').disabled = false; // เปิดให้กดปุ่มยืนยันได้
                 }
             })
             .catch(err => {
-                document.getElementById('loadingText').innerText = "เชื่อมต่อ LINE ล้มเหลว: " + (err.message || err.code);
-                console.error("Init Error:", err);
+                // ถ้ามีปัญหาอะไร จะต้องเด้งบอกสาเหตุบนจอทันที ห้ามค้างเด็ดขาด
+                document.getElementById('loadingText').innerText = "เกิดข้อผิดพลาด: " + (err.message || err);
+                document.getElementById('loadingText').style.color = "red";
+                console.error("LIFF Error:", err);
             });
 
-        // 📌 ฟังก์ชันแยกสำหรับดึง UID โดยเฉพาะ เพื่อความเสถียร
-        function fetchUserProfile() {
-            liff.getProfile()
-                .then(profile => {
-                    userUid = profile.userId; 
-                    document.getElementById('loadingText').style.display = 'none';
-                    document.getElementById('submitBtn').disabled = false; 
-                })
-                .catch(err => {
-                    document.getElementById('loadingText').innerText = "ดึงข้อมูลโปรไฟล์ล้มเหลว กรุณาลองเปิดและปิดใหม่อีกครั้ง";
-                    console.error("Profile Error:", err);
-                });
-        }
-
-        // ฟังก์ชันเมื่อกดส่งฟอร์ม
+        // ฟังก์ชันเมื่อกดส่งฟอร์มลงทะเบียน
         document.getElementById('registerForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
@@ -260,5 +250,6 @@
             }
         }
     </script>
+
 </body>
 </html>
