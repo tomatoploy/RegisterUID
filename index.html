@@ -184,37 +184,44 @@
         </div>
     </div>
 
-    <script>
+<script>
         const MY_LIFF_ID = '2010715614-37aEPk2I'; 
         let userUid = ""; 
 
         // เริ่มต้นการทำงานของ LINE LIFF
-        liff.init({ 
-            liffId: MY_LIFF_ID,
-            withLoginOnExternalBrowser: true
-        })
-        .then(() => {
-            if (!liff.isLoggedIn()) {
-                liff.login(); // บังคับล็อกอินหากยังไม่ได้เข้าสู่ระบบ
-            } else {
-                liff.getProfile()
-                    .then(profile => {
-                        userUid = profile.userId; // ดึง LINE UID สำเร็จ
-                        document.getElementById('loadingText').style.display = 'none';
-                        document.getElementById('submitBtn').disabled = false; // เปิดให้กดปุ่มได้
-                    })
-                    .catch(err => {
-                        // 📌 ดักแสดง Error ให้เห็นชัดๆ บนหน้าจอ
-                        document.getElementById('loadingText').innerText = "ดึงข้อมูลโปรไฟล์ล้มเหลว: " + err.message;
-                        console.error("Profile Error:", err);
-                    });
-            }
-        })
-        .catch(err => {
-            // 📌 ถ้าเชื่อมต่อล้มเหลว จะบอกรหัส Error ออกมาบนหน้าจอเลย
-            document.getElementById('loadingText').innerText = "เชื่อมต่อ LINE ล้มเหลว: " + (err.message || err.code);
-            console.error("Init Error:", err);
-        });
+        liff.init({ liffId: MY_LIFF_ID })
+            .then(() => {
+                // 📌 ตรวจสอบก่อนว่าเปิดในแอป LINE (InClient) หรือเปิดบนเว็บทั่วไป
+                if (liff.isInClient()) {
+                    // ถ้าเปิดในแอป LINE ให้ดึงข้อมูลโปรไฟล์ได้เลยทันที (ห้ามเรียก liff.login() ซ้ำ)
+                    fetchUserProfile();
+                } else {
+                    // ถ้าเปิดเบราว์เซอร์นอก LINE แล้วยังไม่ได้ล็อกอิน ถึงจะค่อยพาไปหน้าล็อกอิน
+                    if (!liff.isLoggedIn()) {
+                        liff.login({ redirectUri: window.location.href });
+                    } else {
+                        fetchUserProfile();
+                    }
+                }
+            })
+            .catch(err => {
+                document.getElementById('loadingText').innerText = "เชื่อมต่อ LINE ล้มเหลว: " + (err.message || err.code);
+                console.error("Init Error:", err);
+            });
+
+        // 📌 ฟังก์ชันแยกสำหรับดึง UID โดยเฉพาะ เพื่อความเสถียร
+        function fetchUserProfile() {
+            liff.getProfile()
+                .then(profile => {
+                    userUid = profile.userId; 
+                    document.getElementById('loadingText').style.display = 'none';
+                    document.getElementById('submitBtn').disabled = false; 
+                })
+                .catch(err => {
+                    document.getElementById('loadingText').innerText = "ดึงข้อมูลโปรไฟล์ล้มเหลว กรุณาลองเปิดและปิดใหม่อีกครั้ง";
+                    console.error("Profile Error:", err);
+                });
+        }
 
         // ฟังก์ชันเมื่อกดส่งฟอร์ม
         document.getElementById('registerForm').addEventListener('submit', function(e) {
@@ -226,7 +233,6 @@
             document.getElementById('submitBtn').innerText = "กำลังบันทึกข้อมูล...";
             document.getElementById('submitBtn').disabled = true;
 
-            // ส่งข้อมูลไปยัง Google Apps Script
             fetch('https://script.google.com/macros/s/AKfycbx65cUVfNubVAMVNb4yE745YEfrxQoZ64-QcUWiazpiN2Xis_dJdCp1QI1DzwRa9PwL2g/exec', {
                 method: 'POST',
                 mode: 'no-cors',
